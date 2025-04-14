@@ -3,7 +3,7 @@
 ## ✅ Setup
 
 ```bash
-git clone https://github.com/username/repo-name.git
+git clone https://github.com/carti69/CS1320_Project
 cd repo-name
 ```
 
