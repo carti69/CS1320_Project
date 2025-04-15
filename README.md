@@ -17,7 +17,7 @@ git checkout -b feature/branch-name
 ## 💾 Add + Commit Your Changes
 
 ```bash
-git add .
+git add main.c
 git commit -m "Short message describing the change"
 ```
 
