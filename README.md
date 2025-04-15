@@ -4,7 +4,7 @@
 
 ```bash
 git clone https://github.com/carti69/CS1320_Project
-cd repo-name
+cd CS1320_Project
 ```
 
 ## 🆕 Starting a Feature / Fix
