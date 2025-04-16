@@ -3,26 +3,47 @@
 #include <stdlib.h>
 #include <string.h>
 
-void menu(char userChoice []);
+void menu(char userChoice [],int wins, int losses);
 void printStartMenu();
 void printRules();
-void printStats();
+void printStats(int wins, int losses);
 void mainGameLogic(char userChoice []);
 void resetBuffer(char userChoice []);
-
-int main(){
-  char *userChoice = malloc(5 * sizeof(char));// user choice allocated on heap to be refrenced throughout program
-  menu(userChoice);
-  free(userChoice);
+FILE* handleUserStatsFile();
+void writeStats(FILE *stats, int wins, int losses);
+void readStats(FILE *stats, int *wins, int *losses);
+int main(){  
+  int wins = 0, losses = 0;
+  FILE *userStats = handleUserStatsFile();//pointer to address of file where stats are stored
+  char *userChoice = malloc(5 * sizeof(char));// user choice allocated on heap to be refrenced throughout program and to be able to clear buffer easier
+  menu(userChoice,wins,losses);
+  free(userChoice);//deallocate memory to prevent memory leak
+  fclose(userStats);//deallocate points to prevent memory leak
   return 0;
-}
 
-void menu(char *userChoice){
+}
+FILE* handleUserStatsFile(){//creates file not file does not exist and also returns pointer to the file
+  FILE *stats = fopen("stats.txt","a+");
+  if(stats == NULL){
+    perror("error opening file");
+  }
+  return stats;
+}
+void writeStats(FILE *stats,int wins,int losses){//writes to the file
+  fprintf(stats,"Wins: %d\nLosses: %d\n",wins,losses);
+}
+void readStats(FILE *stats,int *wins, int *losses){//returns values from file and assigns it to values
+  rewind(stats); //rewind is used to reset the cursor back to the top of the file
+  fscanf(stats,"Wins: %d\nLosses: %d",wins,losses);
+}
+void printStats(int wins, int losses){//prints stats
+  printf("Wins: %d, Losses: %d\n",wins,losses);
+}
+void menu(char *userChoice,int wins,int losses){//handles menu operations
   int userSelecting = 1;
-    while(userSelecting){ 
+    while(userSelecting){ //infinite loop to keep user here
       printStartMenu();
       scanf("%s", userChoice);
-      printf("buffer is currently (%s)\n",userChoice);
       switch (userChoice[0]) { 
         case '1':
           resetBuffer(userChoice);
@@ -30,7 +51,7 @@ void menu(char *userChoice){
           break;
         case '2':
           resetBuffer(userChoice);
-          printStats();
+          printStats(wins,losses);
           break;
         case '3':
           mainGameLogic(userChoice);
@@ -41,8 +62,7 @@ void menu(char *userChoice){
         default:
           printf("invalid choice \n");
           break;
-      }
-      
+      } 
     }
 }
 void printStartMenu(){
@@ -75,9 +95,6 @@ void mainGameLogic(char *userChoice){
 }
 void printRules(){
   printf("rules go here\n");
-}
-void printStats(){
-  printf("states go here but function is a maybe \n");
 }
 void resetBuffer(char *userChoice){
   memset(userChoice,0,5);
