@@ -1,0 +1,4 @@
+#ignore compiled binary
+main
+#ignore build bash script
+build.sh
