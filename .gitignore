@@ -2,3 +2,5 @@
 main
 #ignore build bash script
 build.sh
+#ignore text file
+stats.txt
