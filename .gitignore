@@ -4,3 +4,5 @@ main
 build.sh
 #ignore text file
 stats.txt
+#ignore changes to readme
+README.md
