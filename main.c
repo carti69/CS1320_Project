@@ -99,3 +99,108 @@ void printRules(){
 void resetBuffer(char *userChoice){
   memset(userChoice,0,5);
 } // reset buffer
+int dealCard() {
+  int card = (rand() % 13) + 1;
+  return (card > 10) ? 10 : card;  // Face cards (Jack, Queen, King) are worth 10
+}
+
+// Function to calculate the value of a hand
+int calculateHandValue(int *hand, int cardCount) {
+  int value = 0;
+  int aceCount = 0;
+  
+  for (int i = 0; i < cardCount; i++) {
+      value += hand[i];
+      if (hand[i] == 1) {
+          aceCount++;  // Count the number of Aces
+      }
+  }
+
+  // Adjust for Aces being worth 11 if possible
+  while (value <= 11 && aceCount > 0) {
+      value += 10;
+      aceCount--;
+  }
+
+  return value;
+}
+
+// Function to display a hand
+void displayHand(int *hand, int cardCount, const char *who) {
+  printf("%s's cards: ", who);
+  for (int i = 0; i < cardCount; i++) {
+      printf("%d ", hand[i]);
+  }
+  printf("\n");
+}
+
+const int MAX_CARDS = 10; // Maximum number of cards in a hand
+    srand(time(NULL));  // Initialize random number generator
+
+    int playerHand[MAX_CARDS] = {0};  // Player's hand
+    int dealerHand[MAX_CARDS] = {0};  // Dealer's hand
+    int playerCardCount = 0;          // Number of cards the player has
+    int dealerCardCount = 0;          // Number of cards the dealer has
+    char choice[3];                   // Input choice from the player
+
+    // Deal two cards to the player and dealer
+    playerHand[playerCardCount++] = dealCard();
+    playerHand[playerCardCount++] = dealCard();
+    dealerHand[dealerCardCount++] = dealCard();
+    dealerHand[dealerCardCount++] = dealCard();
+
+    printf("Welcome to Blackjack!\n");
+
+    // Player's turn
+    int playerBust = 0;
+    while (1) {
+        printf("\nYour cards: ");
+        displayHand(playerHand, playerCardCount, "Player");
+        int playerValue = calculateHandValue(playerHand, playerCardCount);
+        printf("Your total value: %d\n", playerValue);
+
+        if (playerValue > 21) {
+            printf("You bust! Dealer wins.\n");
+            playerBust = 1;
+            break;
+        }
+
+        printf("Do you want to (h)it or (s)tand? ");
+        fgets(choice, sizeof(choice), stdin);
+        clearBuffer();  // Clear the newline character left by fgets
+
+        if (choice[0] == 's' || choice[0] == 'S') {
+            break;  // Player stands, end the loop
+        } else if (choice[0] == 'h' || choice[0] == 'H') {
+            playerHand[playerCardCount++] = dealCard();  // Player hits, draw a new card
+        } else {
+            printf("Invalid choice. Please enter 'h' to hit or 's' to stand.\n");
+        }
+    }
+
+    if (playerBust) return 0;  // End the game if player busted
+
+    // Dealer's turn (dealer must hit if their total is less than 17)
+    printf("\nDealer's cards: ");
+    displayHand(dealerHand, dealerCardCount, "Dealer");
+    int dealerValue = calculateHandValue(dealerHand, dealerCardCount);
+    printf("Dealer's total value: %d\n", dealerValue);
+
+    while (dealerValue < 17) {
+        printf("Dealer hits.\n");
+        dealerHand[dealerCardCount++] = dealCard();
+        dealerValue = calculateHandValue(dealerHand, dealerCardCount);
+        printf("Dealer's new total value: %d\n", dealerValue);
+    }
+
+    if (dealerValue > 21) {
+        printf("Dealer busts! You win!\n");
+    } else if (dealerValue > calculateHandValue(playerHand, playerCardCount)) {
+        printf("Dealer wins!\n");
+    } else if (dealerValue < calculateHandValue(playerHand, playerCardCount)) {
+        printf("You win!\n");
+    } else {
+        printf("It's a tie!\n");
+    }
+
+    return 0;
