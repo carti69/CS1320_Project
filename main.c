@@ -139,15 +139,13 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
   int currentRound = 1;
   int playerStands = 0;
   while (inGame) {
+    InitializeHands(playerHand, dealerHand, &playerCardCount, &dealerCardCount);
+    int dealerValue = calculateHandValue(dealerHand, dealerCardCount);
+    int playerValue = calculateHandValue(playerHand, playerCardCount);
+    displayHand(playerHand, playerCardCount, "Player");
+    printf("Player's total value: %d\n", playerValue);
     while (currentRound) {
       resetBuffer(userChoice);
-      InitializeHands(playerHand, dealerHand, &playerCardCount, &dealerCardCount);
-      int dealerValue = calculateHandValue(dealerHand, dealerCardCount);//sometimes program gets stuck here
-      displayHand(dealerHand, dealerCardCount, "Dealer");
-      int playerValue = calculateHandValue(playerHand, playerCardCount);
-      displayHand(playerHand, playerCardCount, "Player");
-      printf("Player's total value: %d\n", playerValue);
-
       printf("Do you want to (h)it or (s)tand? \n");
       scanf("%s", userChoice);
       if(userChoice[0] == 's' || userChoice[0] == 'S'){
@@ -157,15 +155,17 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
           printf("Dealer hits...\n");
           dealerHand[dealerCardCount++] = dealCard();
           dealerValue = calculateHandValue(dealerHand, dealerCardCount);
-          displayHand(dealerHand, dealerCardCount, "Dealer");
-          printf("Dealer's total value: %d\n", dealerValue);
         }
+        printf("Dealer Stands...\n");
+        printf("Dealer's total value: %d\n", dealerValue);
+        displayHand(dealerHand, dealerCardCount, "Dealer");
       }
       else if (userChoice[0] == 'h' || userChoice[0] == 'H') {
         printf("you hit\n");
         playerHand[playerCardCount++] = dealCard();
-        // dealerHand[dealerCardCount++] = dealCard();
         playerValue = calculateHandValue(playerHand,playerCardCount);
+        displayHand(playerHand, playerCardCount, "Player");
+        printf("Player's total value: %d\n", playerValue);
       }
       else if (strcmp("menu", userChoice) == 0) {
         return;
@@ -176,7 +176,7 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
       if(checkBust(playerValue, dealerValue)) {
         break;
       }
-      if (playerStands && dealerValue > 17) {
+      if (playerStands && dealerValue >= 17) {
         if (checkWin(playerValue, dealerValue)) {
           break;
         }
@@ -260,8 +260,12 @@ void displayHand(int *hand, int cardCount, const char *who) {
   printf("\n");
 }
 void InitializeHands(int *playerHand, int *dealerHand, int *playerCardCount, int *dealerCardCount) {
-  playerHand[*playerCardCount++] = dealCard();
-  playerHand[*playerCardCount++] = dealCard();
-  dealerHand[*dealerCardCount++] = dealCard();
-  dealerHand[*dealerCardCount++] = dealCard();
+  playerHand[*playerCardCount] = dealCard();
+  *playerCardCount += 1;
+  playerHand[*playerCardCount] = dealCard();
+  *playerCardCount += 1;
+  dealerHand[*dealerCardCount] = dealCard();
+  *dealerCardCount += 1;
+  dealerHand[*dealerCardCount] = dealCard();
+  *dealerCardCount += 1;
 }
