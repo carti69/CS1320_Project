@@ -20,6 +20,7 @@ void displayHand(int *hand,int cardCount, const char *who);
 int initializeDealerHand(int *dealerHand, int dealerCardCount);
 int checkBust(int playerValue, int dealerValue);
 int checkWin(int playerValue, int dealerValue);
+void InitializeHands(int *playerHand, int *dealerHand, int *playerCardCount, int *dealerCardCount);
 
 const int MAX_CARDS = 10;
 int wins = 0, losses = 0;
@@ -32,11 +33,6 @@ int main(){
   int *dealerHand = malloc(MAX_CARDS * sizeof(int));//dealer hand
   int playerCardCount = 0;          // Number of cards the player has
   int dealerCardCount = 0;
- // Deal two cards to the player and dealer
-  playerHand[playerCardCount++] = dealCard();
-  playerHand[playerCardCount++] = dealCard();
-  dealerHand[dealerCardCount++] = dealCard();
-  dealerHand[dealerCardCount++] = dealCard();
 
   FILE *userStats = handleUserStatsFile();//pointer to address of file where stats are stored
   char *userChoice = malloc(5 * sizeof(char));// user choice allocated on heap to be refrenced throughout program and to be able to clear buffer easier
@@ -135,21 +131,6 @@ int checkWin(int playerValue, int dealerValue) {
   return 0;
 
 }
-int initializeDealerHand(int *dealerHand, int dealerCardCount){
-
-    int dealerValue = calculateHandValue(dealerHand, dealerCardCount);
-    printf("Dealer's total value: %d\n", dealerValue);
-
-    while (dealerValue < 17) {
-        printf("calculating dealer value \n");
-        dealerHand[dealerCardCount++] = dealCard();
-        dealerValue = calculateHandValue(dealerHand, dealerCardCount);
-        if (dealerValue > 21) {
-          dealerValue = 0;
-        }
-    }
-    return dealerValue;
-}
 
 void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *dealerHand, int dealerCardCount){
   printf("Welcome to Blackjack!\n");
@@ -160,7 +141,8 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
   while (inGame) {
     while (currentRound) {
       resetBuffer(userChoice);
-      int dealerValue = initializeDealerHand(dealerHand, dealerCardCount);//sometimes program gets stuck here
+      InitializeHands(playerHand, dealerHand, &playerCardCount, &dealerCardCount);
+      int dealerValue = calculateHandValue(dealerHand, dealerCardCount);//sometimes program gets stuck here
       displayHand(dealerHand, dealerCardCount, "Dealer");
       int playerValue = calculateHandValue(playerHand, playerCardCount);
       displayHand(playerHand, playerCardCount, "Player");
@@ -261,4 +243,10 @@ void displayHand(int *hand, int cardCount, const char *who) {
       printf("%d ", hand[i]);
   }
   printf("\n");
+}
+void InitializeHands(int *playerHand, int *dealerHand, int *playerCardCount, int *dealerCardCount) {
+  playerHand[*playerCardCount++] = dealCard();
+  playerHand[*playerCardCount++] = dealCard();
+  dealerHand[*dealerCardCount++] = dealCard();
+  dealerHand[*dealerCardCount++] = dealCard();
 }
