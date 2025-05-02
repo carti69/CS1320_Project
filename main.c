@@ -153,8 +153,13 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
       if(userChoice[0] == 's' || userChoice[0] == 'S'){
         playerStands = 1;
         printf("you stand \n");
-        dealerHand[dealerCardCount++] = dealCard();
-        dealerValue = calculateHandValue(dealerHand, dealerCardCount);
+        while (dealerValue < 17) {
+          printf("Dealer hits...\n");
+          dealerHand[dealerCardCount++] = dealCard();
+          dealerValue = calculateHandValue(dealerHand, dealerCardCount);
+          displayHand(dealerHand, dealerCardCount, "Dealer");
+          printf("Dealer's total value: %d\n", dealerValue);
+        }
       }
       else if (userChoice[0] == 'h' || userChoice[0] == 'H') {
         printf("you hit\n");
