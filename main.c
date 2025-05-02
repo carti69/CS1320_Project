@@ -10,7 +10,7 @@ void printRules();
 void printStats();
 void mainGameLogic(char userChoice [], int *playerHand,int playerCardCount, int *dealerHand, int dealerCardCount);
 void resetBuffer(char userChoice []);
-void resetHand(int *Hand);
+void resetHand(int *Hand,int *cardCount);
 FILE* handleUserStatsFile();
 void writeStats(FILE *stats);
 void readStats(FILE *stats,int *wins, int *losses);
@@ -18,9 +18,8 @@ int dealCard();
 int calculateHandValue(int *hand, int cardCount);
 void displayHand(int *hand,int cardCount, const char *who);
 int initializeDealerHand(int *dealerHand, int dealerCardCount);
-// int checkPlayerBust(int playerValue);
-// int checkDealerBust(int dealerValue,int playerCardCount,int *playerHand);
-int checkWin(int *playerHand, int playerCardCount ,int dealerValue);
+int checkBust(int playerValue, int dealerValue);
+int checkWin(int playerValue, int dealerValue);
 
 const int MAX_CARDS = 10;
 int wins = 0, losses = 0;
@@ -105,26 +104,32 @@ void printStartMenu(){
   printf("3.Start Game \n");
   printf("4.Exit \n");
 }
-
-int checkWin(int *playerHand, int playerCardCount ,int dealerValue) {
+int checkBust(int playerValue, int dealerValue){
   if (dealerValue > 21) {
     printf("Dealer busts! You win!\n");
     wins++;
     return 1;
   }
-  if (calculateHandValue(playerHand,playerCardCount) > 21) {
+  if (playerValue > 21) {
     printf("You bust! Dealer win!\n");
     losses++;
     return 1;
   }
-  if (dealerValue >  calculateHandValue(playerHand, playerCardCount)) {
+  return 0;//no one bust
+}
+int checkWin(int playerValue, int dealerValue) {
+  if (dealerValue >  playerValue) {
     printf("Dealer wins! \n");
     losses++;
     return 1;
   }
-  else if (dealerValue < calculateHandValue(playerHand, playerCardCount)) {
+  else if (dealerValue < playerValue) {
     printf("You win! \n");
     wins++;
+    return 1;
+  }
+  else if (dealerValue == playerValue) {
+    printf("Its a tie! \n");
     return 1;
   }
   return 0;
@@ -151,6 +156,7 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
   printf("if you would like to back to the menu at any time type \"menu\" \n");
   int inGame = 1;
   int currentRound = 1;
+  int playerStands = 0;
   while (inGame) {
     while (currentRound) {
       resetBuffer(userChoice);
@@ -163,6 +169,7 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
       printf("Do you want to (h)it or (s)tand? \n");
       scanf("%s", userChoice);
       if(userChoice[0] == 's' || userChoice[0] == 'S'){
+        playerStands = 1;
         printf("you stand \n");
         dealerHand[dealerCardCount++] = dealCard();
         dealerValue = calculateHandValue(dealerHand, dealerCardCount);
@@ -179,12 +186,17 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
       else {
         printf("invalid choice please hit or stand \n");
       }
-      if(checkWin(playerHand, playerCardCount, dealerValue)) {//we need to check how to handle this
-        currentRound = 0;
+      if(checkBust(playerValue, dealerValue)) {
+        break;
+      }
+      if (playerStands && dealerValue > 17) {
+        if (checkWin(playerValue, dealerValue)) {
+          break;
+        }
       }
     }//end of current round while
-    resetHand(playerHand);
-    resetHand(dealerHand);
+    resetHand(playerHand,&playerCardCount);
+    resetHand(dealerHand, &dealerCardCount);
     int debatingLifeChoices = 1;
     while (debatingLifeChoices) {
       resetBuffer(userChoice);
@@ -211,8 +223,9 @@ void printRules(){
 void resetBuffer(char *userChoice){
   memset(userChoice,0,5);
 } // reset buffer
-void resetHand(int *Hand) {
+void resetHand(int *Hand,int *cardCount) {
   memset(Hand,0,MAX_CARDS*sizeof(int));
+  *cardCount = 0;
 }//reset the hand
 
 int dealCard() {//helper function
