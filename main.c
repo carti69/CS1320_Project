@@ -203,8 +203,18 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
     }//exit debating while
   }//exit game while
 }//end main game logic function
-void printRules(){
-  printf("rules go here\n");
+void printRules() {
+  printf("\n=== Blackjack Rules ===\n");
+  printf("1. The goal is to get as close to 21 as possible, without going over.\n");
+  printf("2. Number cards (2-10) are worth their face value. Face cards (Jack, Queen, King) are worth 10. Aces are worth 1 or 11.\n");
+  printf("3. Both you and the dealer are dealt two cards at the start. One of the dealer's cards is hidden.\n");
+  printf("4. On your turn, you can choose to 'hit' (draw another card) or 'stand' (end your turn).\n");
+  printf("5. If your hand exceeds 21, you bust and lose the round.\n");
+  printf("6. Once you stand, the dealer reveals their hidden card and must draw cards until their total is 17 or higher.\n");
+  printf("7. If the dealer busts (goes over 21), you win.\n");
+  printf("8. If neither busts, whoever is closer to 21 wins. If both have the same total, it's a tie (push).\n");
+  printf("9. BlackJack (Ace + 10 or face card as first two cards) is an automatic win unless the dealer also has Blackjack.\n");
+  printf("=======================\n\n");
 }
 
 void resetBuffer(char *userChoice){
