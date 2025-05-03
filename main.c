@@ -4,15 +4,15 @@
 #include <string.h>
 #include <time.h>
 
-void menu(char *userChoice ,int *playerHand, int *playerCardCount, int *dealerHand, int *dealerCardCount);
+void menu(char *userChoice ,int *playerHand, int *playerCardCount, int *dealerHand, int *dealerCardCount,FILE *stats);
 void printStartMenu();
 void printRules();
 void printStats();
-void mainGameLogic(char userChoice [], int *playerHand,int playerCardCount, int *dealerHand, int dealerCardCount);
+void mainGameLogic(char userChoice [], int *playerHand,int playerCardCount, int *dealerHand, int dealerCardCount,FILE *stats);
 void resetBuffer(char userChoice []);
 void resetHand(int *Hand,int *cardCount);
 FILE* handleUserStatsFile();
-void writeStats(FILE *stats);
+void writeStats(FILE *stats,int wins, int losses);
 void readStats(FILE *stats,int *wins, int *losses);
 int dealCard();
 int calculateHandValue(int *hand, int cardCount);
@@ -34,39 +34,47 @@ int main(){
   int playerCardCount = 0;          // Number of cards the player has
   int dealerCardCount = 0;
 
-  FILE *userStats = handleUserStatsFile();//pointer to address of file where stats are stored
+  FILE *stats = handleUserStatsFile();//pointer to address of file where stats are stored
   char *userChoice = malloc(5 * sizeof(char));// user choice allocated on heap to be refrenced throughout program and to be able to clear buffer easier
-  menu(userChoice, playerHand, &playerCardCount, dealerHand, &dealerCardCount);
+  menu(userChoice, playerHand, &playerCardCount, dealerHand, &dealerCardCount,stats);
   //deallocate memory to prevent memory leak
   free(playerHand);
   free(dealerHand);
   free(userChoice);
-  fclose(userStats);
+  fclose(stats);
   return 0;
 
 }//end of main
 
 
 FILE* handleUserStatsFile(){//creates file not file does not exist and also returns pointer to the file
-  FILE *stats = fopen("stats.txt","a+");
-  if(stats == NULL){
-    perror("error opening file");
+  FILE *stats = fopen("stats.txt","r+");
+  if (stats == NULL) {
+    stats = fopen("stats.txt","w+");
+    if (stats == NULL) {
+      perror("Error opening file");
+    }
   }
   return stats;
 }
-void writeStats(FILE *stats){//writes to the file
+void writeStats(FILE *stats,int wins, int losses){//writes to the file
+  rewind(stats);//puts parser to top of file
   fprintf(stats,"Wins: %d\nLosses: %d\n",wins,losses);
+  fflush(stats);//ensures its written to disk
 }
 void readStats(FILE *stats,int *wins, int *losses){//returns values from file and assigns it to values
   rewind(stats); //rewind is used to reset the cursor back to the top of the file
-  fscanf(stats,"Wins: %d\nLosses: %d",wins,losses);
+  if (fscanf(stats,"Wins: %d\nLosses: %d",wins,losses) != 2) { // if fscanf fails
+    *wins = 0;
+    *losses = 0;
+  }
 }
 void printStats(){//prints stats
   printf("Wins: %d, Losses: %d\n",wins,losses);
 }
 
 
-void menu(char *userChoice,int *playerHand, int *playerCardCount, int *dealerHand, int *dealerCardCount){//handles menu operations
+void menu(char *userChoice,int *playerHand, int *playerCardCount, int *dealerHand, int *dealerCardCount,FILE *stats){//handles menu operations
   int userSelecting = 1;
     while(userSelecting){ //infinite loop to keep user here
       printStartMenu();
@@ -82,7 +90,7 @@ void menu(char *userChoice,int *playerHand, int *playerCardCount, int *dealerHan
           printStats();
           break;
         case '3':
-          mainGameLogic(userChoice, playerHand, *playerCardCount,dealerHand, *dealerCardCount);
+          mainGameLogic(userChoice, playerHand, *playerCardCount,dealerHand, *dealerCardCount,stats);
           break;
         case '4':
           printf("have a nice day, we look forward to seeing you again \n");
@@ -132,7 +140,7 @@ int checkWin(int playerValue, int dealerValue) {
 
 }
 
-void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *dealerHand, int dealerCardCount){
+void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *dealerHand, int dealerCardCount,FILE *stats){
   printf("Welcome to Blackjack!\n");
   printf("if you would like to back to the menu at any time type \"menu\" \n");
   int inGame = 1;
@@ -182,6 +190,8 @@ void mainGameLogic(char *userChoice, int *playerHand, int playerCardCount, int *
         }
       }
     }//end of current round while
+    writeStats(stats,wins,losses);
+    readStats(stats,&wins,&losses);
     resetHand(playerHand,&playerCardCount);
     resetHand(dealerHand, &dealerCardCount);
     int debatingLifeChoices = 1;
